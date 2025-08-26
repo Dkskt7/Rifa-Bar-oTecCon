@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common'; // <-- necessário para ngClass,
   imports:[FormsModule, CommonModule]
 })
 export class DashboardComponent {
-  input = ''; // ex: "1,2,3"
+  input = ''; 
   message = '';
   loading = false;
 
