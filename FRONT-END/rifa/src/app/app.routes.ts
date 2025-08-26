@@ -5,8 +5,9 @@ import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminGuard } from './auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent },
   { path: 'admin/login', component: LoginComponent },
   { path: 'admin/dashboard', component: DashboardComponent, canActivate: [AdminGuard] },
-  { path: '**', redirectTo: '' } // qualquer rota desconhecida volta para home
+  { path: '**', redirectTo: '/home' }
 ];
