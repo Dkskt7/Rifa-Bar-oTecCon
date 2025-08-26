@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "https://<seu-projeto-vercel>.vercel.app/api"
+  apiUrl: "https://api-rifa-tec.onrender.com/"
 };
