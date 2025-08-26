@@ -1,0 +1,9 @@
+<div class="dashboard-card">
+  <h2>Dashboard Admin</h2>
+  <p>Insira números separados por vírgula (ex: 1,2,3)</p>
+  <textarea [(ngModel)]="input" placeholder="Ex: 1,2,3"></textarea>
+  <button (click)="submit()" [disabled]="loading">
+    {{ loading ? 'Enviando...' : 'Enviar' }}
+  </button>
+  <div class="msg" *ngIf="message">{{ message }}</div>
+</div>

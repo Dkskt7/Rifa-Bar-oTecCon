@@ -1,28 +1,35 @@
-# Angular specific
-/dist/
-/out-tsc/
-/tmp/
-/coverage/
-/e2e/test-output/
-/.angular/
-.angular/
+# =========================
+# BACK-END (Node.js)
+# =========================
+/BACK-END/node_modules
+/BACK-END/dist
+/BACK-END/.env
+/BACK-END/npm-debug.log*
+/BACK-END/yarn-debug.log*
+/BACK-END/yarn-error.log*
+/BACK-END/.DS_Store
 
-# Node modules and dependency files
-/node_modules/
-/package-lock.json
-/yarn.lock
+# =========================
+# FRONT-END (Angular)
+# =========================
+/FRONT-END/rifa/node_modules
+/FRONT-END/rifa/dist
+/FRONT-END/rifa/out-tsc
+/FRONT-END/rifa/.angular/cache
+/FRONT-END/rifa/.env
+/FRONT-END/rifa/package-lock.json
+/FRONT-END/rifa/yarn.lock
+/FRONT-END/rifa/.DS_Store
 
-# Environment files
-/.env
-
-# Angular CLI and build artefacts
-/.angular-cli.json
-/.ng/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# =========================
+# IDEs / OS
+# =========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+.DS_Store

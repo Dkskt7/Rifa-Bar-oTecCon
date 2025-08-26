@@ -1,0 +1,28 @@
+:root{
+    --cyan-1:#19c2ff;
+    --cyan-2:#0bb7ea;
+    --tile:#083c7e;
+    --tile-hover:#0b4f9f;
+    --text:#ffffff;
+  }
+  
+  *{ box-sizing: border-box; }
+  
+  html, body {
+    height: 100%; /* necessário para o body ocupar toda a viewport */
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: var(--text);
+  
+    /* Gradiente que cobre toda a altura da página */
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--cyan-1), var(--cyan-2));
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* opcional: faz o gradiente "fixo" ao rolar */
+  }
+  
+  

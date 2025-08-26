@@ -1,0 +1,29 @@
+<main class="app">
+    <header class="header">
+      <div class="brand">
+        <span class="pre">rifa do</span>
+        <span class="logo">Técnico</span>
+      </div>
+  
+      <div class="badge">Prêmio Xbox One S</div>
+    </header>
+  
+    <section class="board-wrap">
+      <div
+        class="board"
+        [style.gridTemplateColumns]="'repeat(' + perRow + ', 56px)'"
+      >
+        <button
+          type="button"
+          class="cell"
+          *ngFor="let n of numbers"
+          [ngClass]="{ picked: isSelected(n) }"
+          [attr.aria-label]="'Número ' + n + (isSelected(n) ? ' marcado' : '')"
+        >
+          <span class="num">{{ n }}</span>
+          <span class="x" aria-hidden="true">✕</span>
+        </button>
+      </div>
+    </section>
+  </main>
+  
