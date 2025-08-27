@@ -22,10 +22,18 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",  // só força HTTPS no Render
+    secure: process.env.NODE_ENV === "production",  
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
   }
 }));
+
+// Logar como a sessão está configurada no startup
+console.log("NODE_ENV =", process.env.NODE_ENV);
+console.log("FRONTEND_ORIGIN =", FRONTEND_ORIGIN);
+console.log("Session cookie config:", {
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+});
 
 
 const filePath = path.join(__dirname, "vendidos.json");
@@ -94,20 +102,29 @@ app.post("/marcados", checkAuthBearer, (req, res) => {
 app.post("/login", (req, res) => {
   const { user, password } = req.body;
 
+  console.log("Login request body:", req.body);
+  console.log("Current session ID before login:", req.sessionID);
+  console.log("Session object before login:", req.session);
+
   if (!user || !password) {
     return res.status(400).json({ ok: false, error: "user e password são obrigatórios" });
   }
 
   if (user === "admin" && password === ADMIN_PASSWORD) {
-    req.session.isAdmin = true;          // <-- sessão criada no servidor
+    req.session.isAdmin = true;   
+    console.log("✅ Admin autenticado, sessão marcada:", req.session);
     return res.json({ ok: true });
   } else {
+    console.log("❌ Credenciais inválidas");
     return res.status(401).json({ ok: false, error: "Credenciais inválidas" });
   }
 });
 
 // Rota para checar se está logado (Frontend usa para guard)
 app.get("/admin/me", (req, res) => {
+  console.log("🟡 /admin/me chamado");
+  console.log("Session ID:", req.sessionID);
+  console.log("Session data:", req.session);
   res.json({ ok: !!(req.session && req.session.isAdmin) });
 });
 
