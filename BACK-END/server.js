@@ -22,10 +22,11 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true, // em produção, true quando usar HTTPS
-    sameSite: 'lax'
+    secure: process.env.NODE_ENV === "production",  // só força HTTPS no Render
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
   }
 }));
+
 
 const filePath = path.join(__dirname, "vendidos.json");
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
