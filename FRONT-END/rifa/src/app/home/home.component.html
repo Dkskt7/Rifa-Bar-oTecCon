@@ -11,18 +11,25 @@
     <section class="board-wrap">
       <div
         class="board"
-        [style.gridTemplateColumns]="'repeat(' + perRow + ', 56px)'"
+        [style.gridTemplateColumns]="'repeat(' + perRow + ', 1fr)'"
       >
         <button
           type="button"
           class="cell"
-          *ngFor="let n of numbers"
+          *ngFor="let n of paginatedNumbers"
           [ngClass]="{ picked: isSelected(n) }"
           [attr.aria-label]="'Número ' + n + (isSelected(n) ? ' marcado' : '')"
         >
           <span class="num">{{ n }}</span>
           <span class="x" aria-hidden="true">✕</span>
         </button>
+      </div>
+    
+      <!-- controles de paginação -->
+      <div *ngIf="paginatedNumbers.length < numbers.length" class="pagination">
+        <button (click)="prevPage()" [disabled]="currentPage===0">◀</button>
+        <span>Página {{ currentPage + 1 }} / {{ getTotalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="(currentPage+1)*pageSize >= numbers.length">▶</button>
       </div>
     </section>
   </main>
