@@ -23,6 +23,7 @@ export class LoginComponent {
     this.error = '';
     this.auth.login(this.user, this.password).subscribe({
       next: () => {
+                sessionStorage.setItem('isAdminSession', 'true');
         this.loading = false;
         this.router.navigate(['/admin/dashboard']);
       },
