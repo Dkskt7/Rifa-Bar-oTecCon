@@ -6,158 +6,99 @@ const path = require("path");
 const session = require("express-session");
 
 const app = express();
-
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN;
 
 app.use(cors({
-  origin: FRONTEND_ORIGIN,   // important: allow exact origin so cookies funcionem
+  origin: FRONTEND_ORIGIN,
   credentials: true
 }));
 app.use(express.json());
 
-// sessions (para não expor token no frontend)
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-   proxy: true, 
+  proxy: true,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",  
+    secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
   }
 }));
 
-// Logar como a sessão está configurada no startup
-console.log("NODE_ENV =", process.env.NODE_ENV);
-console.log("FRONTEND_ORIGIN =", FRONTEND_ORIGIN);
-console.log("Session cookie config:", {
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-});
-
-
 const filePath = path.join(__dirname, "vendidos.json");
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const PORT = process.env.PORT || 3000;
 
-function loadMarcados() {
+// Lê JSON do banco, cria estrutura se não existir
+function loadData() {
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify({ numeros: [] }, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify({ usuarios: [] }, null, 2));
   }
-  const data = fs.readFileSync(filePath, "utf-8");
-  return new Set(JSON.parse(data).numeros || []);
+  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
 }
 
-let marcados = loadMarcados();
+// Salva JSON no disco
+function saveData(data) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
 
-// GET → público
+// --- Endpoint público /marcados (mantido, sem alteração) ---
 app.get("/marcados", (req, res) => {
-  marcados = loadMarcados();
-  res.json([...marcados]);
+  const data = loadData();
+  const allNumbers = data.usuarios.flatMap(u => u.numeros);
+  res.json(allNumbers);
 });
 
-// Mantive sua rota original que exige Bearer (opcional)
+// --- Endpoint admin via Bearer token (mantido) ---
 function checkAuthBearer(req, res, next) {
   const auth = req.headers["authorization"];
   if (!auth) return res.status(401).json({ error: "Auth header requerido" });
-
   const parts = auth.split(" ");
   if (parts.length !== 2 || parts[0] !== "Bearer") {
     return res.status(401).json({ error: "Formato inválido" });
   }
-
   const token = parts[1];
-  if (token !== ADMIN_TOKEN) {
-    return res.status(403).json({ error: "Token inválido" });
-  }
-
+  if (token !== process.env.ADMIN_TOKEN) return res.status(403).json({ error: "Token inválido" });
   next();
 }
 
 app.post("/marcados", checkAuthBearer, (req, res) => {
   const { numeros } = req.body;
-  if (!Array.isArray(numeros)) {
-    return res.status(400).json({ error: "O campo 'numeros' precisa ser um array" });
-  }
+  if (!Array.isArray(numeros)) return res.status(400).json({ error: "O campo 'numeros' precisa ser um array" });
+
+  const data = loadData();
+  const adminUser = data.usuarios.find(u => u.nome === "admin") || { nome: "admin", numeros: [] };
 
   let adicionados = 0;
-  numeros.forEach(num => {
-    if (!marcados.has(num)) {
-      marcados.add(num);
+  numeros.forEach(n => {
+    if (!adminUser.numeros.includes(n)) {
+      adminUser.numeros.push(n);
       adicionados++;
     }
   });
 
-  fs.writeFileSync(filePath, JSON.stringify({ numeros: [...marcados] }, null, 2));
+  if (!data.usuarios.some(u => u.nome === "admin")) data.usuarios.push(adminUser);
+  saveData(data);
 
-  res.json({
-    ok: true,
-    total: marcados.size,
-    adicionados: adicionados
-  });
+  res.json({ ok: true, total: adminUser.numeros.length, adicionados });
 });
 
-// --- Login que cria sessão (não envia token ao cliente)
+// --- Login/admin session ---
 app.post("/login", (req, res) => {
   const { user, password } = req.body;
-
-  console.log("Login request body:", req.body);
-  console.log("Current session ID before login:", req.sessionID);
-  console.log("Session object before login:", req.session);
-
-  if (!user || !password) {
-    return res.status(400).json({ ok: false, error: "user e password são obrigatórios" });
-  }
-
   if (user === "admin" && password === ADMIN_PASSWORD) {
-    req.session.isAdmin = true;   
-    console.log("✅ Admin autenticado, sessão marcada:", req.session);
+    req.session.isAdmin = true;
     return res.json({ ok: true });
   } else {
-    console.log("❌ Credenciais inválidas");
     return res.status(401).json({ ok: false, error: "Credenciais inválidas" });
   }
 });
 
-// Rota para checar se está logado (Frontend usa para guard)
 app.get("/admin/me", (req, res) => {
-  console.log("🟡 /admin/me chamado");
-  console.log("Session ID:", req.sessionID);
-  console.log("Session data:", req.session);
   res.json({ ok: !!(req.session && req.session.isAdmin) });
 });
 
-// Rota administrativa que usa sessão (NUNCA expõe ADMIN_TOKEN)
-app.post("/admin/marcados", (req, res) => {
-  if (!(req.session && req.session.isAdmin)) {
-    return res.status(401).json({ error: "Não autenticado" });
-  }
-
-  const { numeros } = req.body;
-  if (!Array.isArray(numeros)) {
-    return res.status(400).json({ error: "O campo 'numeros' precisa ser um array" });
-  }
-
-  let adicionados = 0;
-  numeros.forEach(num => {
-    if (!marcados.has(num)) {
-      marcados.add(num);
-      adicionados++;
-    }
-  });
-
-  fs.writeFileSync(filePath, JSON.stringify({ numeros: [...marcados] }, null, 2));
-
-  res.json({
-    ok: true,
-    total: marcados.size,
-    adicionados
-  });
-});
-
-// logout
 app.get("/admin/logout", (req, res) => {
   req.session.destroy(err => {
     if (err) return res.status(500).json({ error: "Erro ao deslogar" });
@@ -166,5 +107,36 @@ app.get("/admin/logout", (req, res) => {
   });
 });
 
-app.listen(PORT, () => console.log(`Backend rodando em ${__dirname} na porta ${PORT}`));
+// --- Rota administrativa POST /admin/marcados para qualquer usuário ---
+app.post("/admin/marcados", (req, res) => {
+  if (!(req.session && req.session.isAdmin)) return res.status(401).json({ error: "Não autenticado" });
 
+  const { usuario, numeros } = req.body;
+  if (!usuario || !Array.isArray(numeros)) return res.status(400).json({ error: "usuario e numeros são obrigatórios" });
+
+  const data = loadData();
+  let user = data.usuarios.find(u => u.nome === usuario);
+  if (!user) {
+    user = { nome: usuario, numeros: [] };
+    data.usuarios.push(user);
+  }
+
+  let adicionados = 0;
+  numeros.forEach(n => {
+    if (!user.numeros.includes(n)) {
+      user.numeros.push(n);
+      adicionados++;
+    }
+  });
+
+  saveData(data);
+  res.json({ ok: true, total: user.numeros.length, adicionados });
+});
+
+// GET lista de usuários (combo box frontend)
+app.get("/admin/usuarios", (req, res) => {
+  const data = loadData();
+  res.json(data.usuarios.map(u => u.nome));
+});
+
+app.listen(PORT, () => console.log(`Backend rodando em ${__dirname} na porta ${PORT}`));

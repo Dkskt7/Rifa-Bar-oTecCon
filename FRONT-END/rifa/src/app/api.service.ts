@@ -21,8 +21,14 @@ export class ApiService {
     return this.http.get<{ ok: boolean }>(`${this.base}/admin/me`, { withCredentials: true });
   }
 
-  postAdminMarcados(numeros: number[]) {
-    return this.http.post(`${this.base}/admin/marcados`, { numeros }, { withCredentials: true });
+  // --- Atualizado para aceitar usuário ---
+  postAdminMarcados(usuario: string, numeros: number[]) {
+    return this.http.post(`${this.base}/admin/marcados`, { usuario, numeros }, { withCredentials: true });
+  }
+
+  // --- Lista de usuários (combo box) ---
+  getUsuarios() {
+    return this.http.get<string[]>(`${this.base}/admin/usuarios`, { withCredentials: true });
   }
 
   logout() {

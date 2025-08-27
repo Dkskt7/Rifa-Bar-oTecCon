@@ -1,9 +1,21 @@
 <div class="dashboard-card">
   <h2>Dashboard Admin</h2>
+
+  <p>Selecione ou digite o usuário</p>
+  <select [(ngModel)]="usuarioSelecionado">
+    <option value="">-- Selecione um usuário existente --</option>
+    <option *ngFor="let u of usuarios" [value]="u">{{ u }}</option>
+  </select>
+
+  <p>Ou crie um novo usuário</p>
+  <input [(ngModel)]="usuarioInput" placeholder="Nome do usuário" />
+
   <p>Insira números separados por vírgula (ex: 1,2,3)</p>
   <textarea [(ngModel)]="input" placeholder="Ex: 1,2,3"></textarea>
+
   <button (click)="submit()" [disabled]="loading">
-    {{ loading ? 'Enviando...' : 'Enviar' }}
+    {{ loading ? 'Enviando...' : 'Adicionar números' }}
   </button>
+
   <div class="msg" *ngIf="message">{{ message }}</div>
 </div>
