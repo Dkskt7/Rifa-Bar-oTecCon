@@ -28,7 +28,6 @@ app.use(session({
 
 const filePath = path.join(__dirname, "vendidos.json");
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const PORT = process.env.PORT || 3000;
 
 // Lê JSON do banco, cria estrutura se não existir
 function loadData() {
@@ -150,7 +149,8 @@ app.get("/admin/usuarios-completos", (req, res) => {
   res.json(data.usuarios);
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Backend rodando em ${__dirname} na porta ${PORT}`);
-});
+const PORT = process.env.PORT || 8080;
 
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend rodando na porta ${PORT}`);
+});
