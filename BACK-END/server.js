@@ -106,6 +106,9 @@ app.get("/admin/logout", (req, res) => {
     res.json({ ok: true });
   });
 });
+app.get("/healthz", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // --- Rota administrativa POST /admin/marcados para qualquer usuário ---
 app.post("/admin/marcados", (req, res) => {
