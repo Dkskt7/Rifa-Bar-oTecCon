@@ -1,0 +1,22 @@
+<div class="dashboard-card">
+    <h2>Planilha de Usuários</h2>
+  
+    <div *ngIf="loading">Carregando...</div>
+    <div *ngIf="error">{{ error }}</div>
+  
+    <table *ngIf="!loading && !error" class="styled-table">
+      <thead>
+        <tr>
+          <th>Usuário</th>
+          <th>Números</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usuarios">
+          <td>{{ u.nome }}</td>
+          <td>{{ u.numeros.join(', ') }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

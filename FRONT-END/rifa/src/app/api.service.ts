@@ -30,7 +30,13 @@ export class ApiService {
   getUsuarios() {
     return this.http.get<string[]>(`${this.base}/admin/usuarios`, { withCredentials: true });
   }
-
+  getUsuariosCompletos() {
+    return this.http.get<{ nome: string; numeros: number[] }[]>(
+      `${this.base}/admin/usuarios-completos`,
+      { withCredentials: true }
+    );
+  }
+  
   logout() {
     return this.http.get(`${this.base}/admin/logout`, { withCredentials: true });
   }

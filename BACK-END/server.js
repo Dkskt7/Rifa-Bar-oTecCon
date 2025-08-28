@@ -138,5 +138,13 @@ app.get("/admin/usuarios", (req, res) => {
   const data = loadData();
   res.json(data.usuarios.map(u => u.nome));
 });
+// GET lista completa de usuários com seus números
+app.get("/admin/usuarios-completos", (req, res) => {
+  if (!(req.session && req.session.isAdmin)) {
+    return res.status(401).json({ error: "Não autenticado" });
+  }
+  const data = loadData();
+  res.json(data.usuarios);
+});
 
 app.listen(PORT, () => console.log(`Backend rodando em ${__dirname} na porta ${PORT}`));
