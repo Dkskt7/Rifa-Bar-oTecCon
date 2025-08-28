@@ -147,4 +147,7 @@ app.get("/admin/usuarios-completos", (req, res) => {
   res.json(data.usuarios);
 });
 
-app.listen(PORT, () => console.log(`Backend rodando em ${__dirname} na porta ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend rodando em ${__dirname} na porta ${PORT}`);
+});
+
