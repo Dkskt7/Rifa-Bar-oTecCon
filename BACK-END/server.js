@@ -7,7 +7,7 @@ const session = require("express-session");
 
 const app = express();
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN;
-
+app.set("trust proxy", 1);
 app.use(cors({
   origin: FRONTEND_ORIGIN,
   credentials: true
