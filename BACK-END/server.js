@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const session = require("express-session");
 
+const PORT = process.env.PORT || 8080;
 const app = express();
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN;
 app.set("trust proxy", 1);
@@ -149,7 +150,6 @@ app.get("/admin/usuarios-completos", (req, res) => {
   res.json(data.usuarios);
 });
 
-const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend rodando na porta ${PORT}`);
