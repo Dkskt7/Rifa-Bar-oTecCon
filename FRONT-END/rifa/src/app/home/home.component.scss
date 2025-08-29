@@ -79,7 +79,7 @@
   height: 56px;
   border: 0;
   border-radius: 12px;
-  background: var(--tile);
+  background: var(--tile);  // fundo base
   color: var(--text);
   font-weight: 700;
   font-size: 1rem;
@@ -87,15 +87,20 @@
   cursor: pointer;
   outline: none;
   box-shadow: inset 0 -4px 0 rgba(255,255,255,.05);
-  transition: transform 0.06s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.06s ease, box-shadow 0.2s ease;
 
-  &:hover { background: var(--tile-hover); transform: translateY(-1px); }
+  &:hover { 
+    background: var(--tile-hover); 
+    transform: translateY(-1px); 
+  }
 
   .num {
     position: absolute; inset: 0;
     display: grid; place-items: center;
     user-select: none;
+    z-index: 2; // garante que fique acima do overlay
   }
+
   .x {
     position: absolute; inset: 0;
     display: grid; place-items: center;
@@ -103,13 +108,30 @@
     opacity: 0;
     user-select: none;
     pointer-events: none;
+    z-index: 2;
   }
 
-  &.picked {
-    .num { opacity: 0.35; }
-    .x { opacity: 1; }
+  // Overlay vermelho translúcido
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 0, 0, 0.4); // vermelho translúcido
+    border-radius: inherit;           // mantém os cantos arredondados
+    opacity: 0;                       // invisível por padrão
+    pointer-events: none;             // não bloqueia clique
+    transition: opacity 0.2s ease;    // animação suave
+    z-index: 1;                        // abaixo do número/X
   }
+
+  &.picked::after {
+    opacity: 1; // ativa o overlay
+  }
+
+  &.picked .num { opacity: 0.35; } // número mais apagado
+  &.picked .x   { opacity: 1; }    // X aparece
 }
+
 
 .pagination {
   display: flex;

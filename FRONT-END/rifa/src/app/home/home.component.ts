@@ -48,7 +48,7 @@ export class HomeComponent implements OnInit {
     } else if (w < 768) {
       this.perRow = 10;
     } else {
-      this.perRow = 15;
+      this.perRow = 10;
     }
   
     if (w <= 768) {
@@ -57,7 +57,7 @@ export class HomeComponent implements OnInit {
       this.pageSize = this.perRow * linhasVisiveis;
     } else {
       // Telas médias/grandes: 150 números por página
-      this.pageSize = 150;
+      this.pageSize = 100;
     }
   
     const start = this.currentPage * this.pageSize;
