@@ -22,12 +22,10 @@ export class AdminPlanilhaComponent implements OnInit {
       next: (res) => {
         this.usuarios = res;
         this.loading = false;
-        console.log("Usuários recebidos:", this.usuarios); // 👈 agora sim
       },
       error: (err) => {
         this.error = 'Erro ao carregar usuários ou não autenticado.';
         this.loading = false;
-        console.error("Erro na API:", err); // 👈 debug de erro
       }
     });
   }
