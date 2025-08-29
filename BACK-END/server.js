@@ -5,9 +5,10 @@ const fs = require("fs");
 const path = require("path");
 const session = require("express-session");
 
+const PORT = process.env.PORT || 8080;
 const app = express();
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN;
-
+app.set("trust proxy", 1);
 app.use(cors({
   origin: FRONTEND_ORIGIN,
   credentials: true
@@ -28,7 +29,6 @@ app.use(session({
 
 const filePath = path.join(__dirname, "vendidos.json");
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const PORT = process.env.PORT || 3000;
 
 // Lê JSON do banco, cria estrutura se não existir
 function loadData() {
@@ -106,6 +106,9 @@ app.get("/admin/logout", (req, res) => {
     res.json({ ok: true });
   });
 });
+app.get("/healthz", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // --- Rota administrativa POST /admin/marcados para qualquer usuário ---
 app.post("/admin/marcados", (req, res) => {
@@ -147,4 +150,7 @@ app.get("/admin/usuarios-completos", (req, res) => {
   res.json(data.usuarios);
 });
 
-app.listen(PORT, () => console.log(`Backend rodando em ${__dirname} na porta ${PORT}`));
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend rodando na porta ${PORT}`);
+});
