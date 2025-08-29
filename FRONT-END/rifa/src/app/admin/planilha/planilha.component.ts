@@ -4,7 +4,8 @@ import { ApiService } from '../../api.service';
 @Component({
   selector: 'app-admin-planilha',
   templateUrl: './planilha.component.html',
-  styleUrls: ['./planilha.component.scss']
+  styleUrls: ['./planilha.component.scss'],
+  standalone:true
 })
 export class AdminPlanilhaComponent implements OnInit {
   usuarios: { nome: string; numeros: number[] }[] = [];
