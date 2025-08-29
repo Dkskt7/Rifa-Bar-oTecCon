@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-planilha',
@@ -15,7 +16,7 @@ export class AdminPlanilhaComponent implements OnInit {
   loading = true;
   error = '';
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private router: Router) {}
 
   ngOnInit() {
     this.api.getUsuariosCompletos().subscribe({
@@ -29,5 +30,7 @@ export class AdminPlanilhaComponent implements OnInit {
       }
     });
   }
-  
+  goToHome() {
+    this.router.navigate(['/home']);
+    }
 }

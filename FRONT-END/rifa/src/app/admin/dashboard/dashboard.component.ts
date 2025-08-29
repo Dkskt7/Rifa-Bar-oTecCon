@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,7 +19,7 @@ export class DashboardComponent implements OnInit {
   message = '';
   loading = false;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private router: Router) {}
 
   ngOnInit() {
     this.loadUsuarios();
@@ -29,7 +30,9 @@ export class DashboardComponent implements OnInit {
       this.usuarios = res;
     });
   }
-
+  goToHome() {
+    this.router.navigate(['/home']);
+    }
   submit() {
     const usuario = this.usuarioSelecionado || this.usuarioInput.trim();
     if (!usuario) {

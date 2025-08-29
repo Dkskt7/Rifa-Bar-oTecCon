@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../api.service';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -18,7 +19,7 @@ export class HomeComponent implements OnInit {
   pageSize = 50; // só para celulares/small
   paginatedNumbers: number[] = [];
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService, private router : Router) { }
 
   ngOnInit() {
     this.calcCols();
@@ -85,7 +86,14 @@ export class HomeComponent implements OnInit {
       this.marcados = new Set(arr);
     });
   }
+  goToLogin() {
+    this.router.navigate(['/admin/login']);
+  }
 
+  goToPlanilha() {
+    // navega para login, depois o fluxo de autenticação leva para /admin/planilha
+    this.router.navigate(['/admin/login'], { queryParams: { redirect: '/admin/planilha' } });
+  }
   isSelected(n: number) {
     return this.marcados.has(n);
   }
