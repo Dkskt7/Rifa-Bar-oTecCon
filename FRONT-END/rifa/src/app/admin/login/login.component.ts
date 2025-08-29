@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute} from '@angular/router';
 import { AuthService } from '../../auth.service';
 import { FormsModule } from '@angular/forms';  // <-- necessário para ngModel
 import { CommonModule } from '@angular/common'; // <-- necessário para ngClass, ngIf, ngFor
@@ -15,9 +15,19 @@ export class LoginComponent {
   password = '';
   error = '';
   loading = false;
+redirectUrl: string | null = null;
 
-  constructor(private auth: AuthService, private router: Router) {}
-
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+  ngOnInit(){
+    this.redirectUrl = this.route.snapshot.queryParamMap.get('redirect');
+  }
+  goToHome() {
+    this.router.navigate(['/home']);
+    }
   submit() {
     this.loading = true;
     this.error = '';
@@ -25,7 +35,11 @@ export class LoginComponent {
       next: () => {
                 sessionStorage.setItem('isAdminSession', 'true');
         this.loading = false;
-        this.router.navigate(['/admin/dashboard']);
+        if (this.redirectUrl) {
+          this.router.navigateByUrl(this.redirectUrl);
+        } else {
+          this.router.navigate(['/admin/dashboard']);
+        }
       },
       error: (err) => {
         this.loading = false;
