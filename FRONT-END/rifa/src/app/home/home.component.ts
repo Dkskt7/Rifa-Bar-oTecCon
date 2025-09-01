@@ -18,6 +18,8 @@ export class HomeComponent implements OnInit {
   currentPage = 0;
   pageSize = 50; // só para celulares/small
   paginatedNumbers: number[] = [];
+  touchStartX = 0;
+touchEndX = 0;
 
   constructor(private api: ApiService, private router : Router) { }
 
@@ -29,7 +31,32 @@ export class HomeComponent implements OnInit {
       this.calcPagination();
     });
     this.loadMarcados();
+  
+    const board = document.querySelector('.board-wrap') as HTMLElement | null;
+    if (board) {
+      board.addEventListener('touchstart', (e: Event) => this.onTouchStart(e as TouchEvent));
+      board.addEventListener('touchend', (e: Event) => this.onTouchEnd(e as TouchEvent));
+    }
   }
+  handleSwipe() {
+    const deltaX = this.touchEndX - this.touchStartX;
+    const swipeThreshold = 50; // mínimo em px para considerar swipe
+  
+    if (deltaX > swipeThreshold) {
+      this.prevPage(); // deslizou para a direita → anterior
+    } else if (deltaX < -swipeThreshold) {
+      this.nextPage(); // deslizou para a esquerda → próxima
+    }
+  }
+  onTouchStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+  
+  onTouchEnd(event: TouchEvent) {
+    this.touchEndX = event.changedTouches[0].screenX;
+    this.handleSwipe();
+  }
+  
   getTotalPages(): number {
     return Math.ceil(this.numbers.length / this.pageSize);
   }

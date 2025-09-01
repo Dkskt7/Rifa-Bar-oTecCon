@@ -57,11 +57,22 @@
 }
 
 .board-wrap {
-  display: grid;
-  place-items: center;
-  padding: 1rem 1rem 2rem;
-  width: 100%;
-  overflow-x: auto;
+  display: flex;
+  justify-content: center; /* centraliza horizontalmente */
+  padding: 1rem;
+}
+
+.board-container {
+  position: relative; /* base para os botões absolutos */
+  display: flex;
+  align-items: center; /* centraliza verticalmente as setas com o board */
+}
+.current-page {
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
 }
 
 .board {
@@ -71,8 +82,29 @@
   border-radius: 16px;
   background: rgba(255,255,255,.08);
   box-shadow: 0 12px 30px rgba(0,0,0,.18);
-  justify-content: center;
 }
+
+.page-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(255,255,255,0.2);
+  border-radius: 100%; // círculo
+  padding: 1rem;      // aumenta o círculo
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) { background: rgba(255,255,255,0.35); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+
+
+  &.left { left: -3.5rem; }   // aumenta o valor negativo para afastar mais da borda
+  &.right { right: -3.5rem; } // aumenta o valor negativo para afastar mais da borda
+}
+
 .top-btn {
   position: absolute;
   top: 1.5rem;
@@ -158,57 +190,87 @@
 }
 
 
-.pagination {
+.pagination-wrapper {
+  position: relative;
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
-  font-weight: 600;
-  color: var(--text);
-  user-select: none;
+  align-items: center;
+  margin-top: 0.5rem; // deixa mais próximo do board
+  width: fit-content;  // centraliza em relação ao board
+  margin-left: auto;
+  margin-right: auto;
 
-  span {
-    font-size: clamp(0.9rem, 2vw, 1.1rem);
+  .current-page {
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 1.5rem; // distância das setas
   }
 
-  button {
-    border: 0;
-    padding: 0.4rem 0.8rem;
+  .page-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: rgba(255,255,255,0.15);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.15);
-    color: var(--text);
-    font-weight: 700;
+    padding: 0.5rem;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
-    min-width: 36px;
-    text-align: center;
+    font-weight: 700;
+    transition: background 0.2s;
 
-    &:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateY(-1px);
-    }
+    &:hover:not(:disabled) { background: rgba(255,255,255,0.25); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-    }
+    &.left { left: -2rem; }   // desloca mais para dentro do board
+    &.right { right: -2rem; } // desloca mais para dentro do board
   }
 }
 
+
+.pagination {
+  display: none; // por padrão escondemos no desktop
+}
 /* responsivo: diminui espaçamento e tamanho do texto em telas pequenas */
+/* Mobile */
 @media (max-width: 480px) {
+  .page-btn { display: none; }  // escondemos as setas flutuantes
+
   .pagination {
-    gap: 0.5rem;
-
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    user-select: none;
+  
     span {
-      font-size: 0.85rem;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
     }
-
+  
     button {
-      padding: 0.3rem 0.6rem;
-      min-width: 30px;
+      border: 0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      min-width: 36px;
+      text-align: center;
+  
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-1px);
+      }
+  
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+      }
     }
   }
 }
