@@ -4,6 +4,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const session = require("express-session");
+const { Console } = require("console");
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -153,4 +154,5 @@ app.get("/admin/usuarios-completos", (req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend rodando na porta ${PORT}`);
+  console.log('HEHEHHEHEHEH');
 });

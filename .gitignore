@@ -3,6 +3,7 @@
 # =========================
 /BACK-END/node_modules
 /BACK-END/dist
+/BACK-END/vendidos.json
 /BACK-END/.env
 /BACK-END/npm-debug.log*
 /BACK-END/yarn-debug.log*
