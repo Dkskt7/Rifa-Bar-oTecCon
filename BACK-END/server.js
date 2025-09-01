@@ -154,5 +154,4 @@ app.get("/admin/usuarios-completos", (req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend rodando na porta ${PORT}`);
-  console.log('HEHEHHEHEHEH');
 });
