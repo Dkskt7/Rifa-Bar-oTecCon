@@ -81,9 +81,8 @@ app.post("/marcados", checkAuthBearer, (req, res) => {
 
   if (!data.usuarios.some(u => u.nome === "admin")) data.usuarios.push(adminUser);
   saveData(data);
-
+  console.log(`[ACESSO] ${new Date().toISOString()} - GET /marcados - IP: ${req.ip}`);
   res.json({ ok: true, total: adminUser.numeros.length, adicionados });
-  console.log('request no marcados')
 });
 
 // --- Login/admin session ---
