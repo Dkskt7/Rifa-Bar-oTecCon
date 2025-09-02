@@ -83,6 +83,7 @@ app.post("/marcados", checkAuthBearer, (req, res) => {
   saveData(data);
 
   res.json({ ok: true, total: adminUser.numeros.length, adicionados });
+  console.log('request no marcados')
 });
 
 // --- Login/admin session ---
