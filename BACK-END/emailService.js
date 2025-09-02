@@ -29,14 +29,15 @@ async function enviarEmailPlanilha(destinatario) {
   const planilhaBuffer = await gerarPlanilha();
 
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_PORT == 465,
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // SSL
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+      user: process.env.EMAIL_USER,   // seu Gmail
+      pass: process.env.EMAIL_PASS    // App Password gerada
     }
   });
+  
 
   await transporter.sendMail({
     from: `"Relatório Vendidos" <${process.env.EMAIL_USER}>`,
