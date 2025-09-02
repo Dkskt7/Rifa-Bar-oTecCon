@@ -55,10 +55,6 @@ export class AdminPlanilhaComponent implements OnInit {
     if (!this.email) return;
     this.sending = true;
     this.sendMessage = '';
-
-    this.api.postAdminMarcados('admin', []) // placeholder para autenticação
-      .subscribe(); // mantido para login/session, não será usado para envio
-
     // Chamada real para enviar planilha
     this.api.sendPlanilhaEmail(this.email).subscribe({
       next: () => {
