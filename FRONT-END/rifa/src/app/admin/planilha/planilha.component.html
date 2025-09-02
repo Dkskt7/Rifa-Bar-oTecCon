@@ -1,5 +1,5 @@
 <main>  <header>
-  <button class="top-btn left" (click)="goToHome()" aria-label="Planilha">
+  <button class="top-btn-home left" (click)="goToHome()" aria-label="Planilha">
     <!-- Ícone de planilha SVG -->
     <svg 
     width="24" 
@@ -21,24 +21,45 @@
   </button>
 </header></main>
 <div class="dashboard-card">
-    <h2>Planilha de Usuários</h2>
-  
-    <div *ngIf="loading">Carregando...</div>
-    <div *ngIf="error">{{ error }}</div>
-  
-    <table *ngIf="!loading && !error" class="styled-table">
-      <thead>
-        <tr>
-          <th>Usuário</th>
-          <th>Números</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let u of usuarios">
-          <td>{{ u.nome }}</td>
-          <td>{{ u.numeros.join(', ') }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <h2>Planilha de Usuários</h2>
+
+  <div *ngIf="loading">Carregando...</div>
+  <div *ngIf="error">{{ error }}</div>
+
+  <table *ngIf="!loading && !error" class="styled-table">
+    <thead>
+      <tr>
+        <th>Usuário</th>
+        <th>Números</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of usuarios">
+        <td>{{ u.nome }}</td>
+        <td>{{ u.numeros.join(', ') }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Botão normal abaixo da tabela -->
+  <div class="btn-container">
+    <button class="top-btn" (click)="openModal()">📧 Enviar Planilha</button>
   </div>
+  
+</div>
+
+
+<!-- Modal simples -->
+<div class="modal-backdrop" *ngIf="showModal">
+  <div class="modal">
+    <h3>Enviar Planilha por Email</h3>
+    <input type="email" placeholder="Digite o email" [(ngModel)]="email" />
+    <button (click)="enviarPlanilha()" [disabled]="sending">
+      {{ sending ? 'Enviando...' : 'Enviar Email' }}
+    </button>
+    <button class="close-btn" (click)="closeModal()">Fechar</button>
+    <p>{{ sendMessage }}</p>
+  </div>
+</div>
+
   

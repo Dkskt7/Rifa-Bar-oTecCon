@@ -25,6 +25,10 @@ export class ApiService {
   postAdminMarcados(usuario: string, numeros: number[]) {
     return this.http.post(`${this.base}/admin/marcados`, { usuario, numeros }, { withCredentials: true });
   }
+// --- Enviar planilha ---
+sendPlanilhaEmail(email: string) {
+  return this.http.post(`${this.base}/admin/enviar-planilha`, { email }, { withCredentials: true });
+}
 
   // --- Lista de usuários (combo box) ---
   getUsuarios() {

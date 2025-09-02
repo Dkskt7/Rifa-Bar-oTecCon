@@ -13,7 +13,11 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
-    "express-session": "^1.18.2"
+    "express-session": "^1.18.2",
+    "fs": "^0.0.1-security",
+    "nodemailer": "^7.0.6",
+    "path": "^0.12.7"
   }
 }
