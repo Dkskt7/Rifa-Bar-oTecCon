@@ -12,7 +12,7 @@ const client = new MongoClient(uri, {
 async function loadData() {
   try {
     await client.connect();
-    const db = client.db("NumerosRifa"); // nome do DB que você criou
+    const db = client.db("numerosrifa"); // nome do DB que você criou
     const usuariosCollection = db.collection("usuarios"); // nome da coleção
     const usuarios = await usuariosCollection.find({}).toArray();
     return { usuarios };
