@@ -102,18 +102,6 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-/* Destaque das células selecionadas */
-.cell.selected {
-  background: #c8f7c5; /* verde claro */
-  transform: scale(1.1);
-  box-shadow: 0 0 12px rgba(37, 211, 102, 0.7);
-}
-
-.cell.picked {
-  background: #f8c8c8; /* vermelho claro para marcados */
-  transform: scale(1);
-  box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
-}
 
 .board {
   display: grid;
@@ -176,7 +164,7 @@
   height: 56px;
   border: 0;
   border-radius: 12px;
-  background: var(--tile);  // fundo base
+  background: var(--tile);  /* fundo base */
   color: var(--text);
   font-weight: 700;
   font-size: 1rem;
@@ -184,7 +172,7 @@
   cursor: pointer;
   outline: none;
   box-shadow: inset 0 -4px 0 rgba(255,255,255,.05);
-  transition: transform 0.06s ease, box-shadow 0.2s ease;
+  transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
 
   &:hover { 
     background: var(--tile-hover); 
@@ -195,7 +183,7 @@
     position: absolute; inset: 0;
     display: grid; place-items: center;
     user-select: none;
-    z-index: 2; // garante que fique acima do overlay
+    z-index: 2; /* acima do overlay */
   }
 
   .x {
@@ -208,26 +196,34 @@
     z-index: 2;
   }
 
-  // Overlay vermelho translúcido
+  /* Overlay vermelho translúcido */
   &::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(255, 0, 0, 0.4); // vermelho translúcido
-    border-radius: inherit;           // mantém os cantos arredondados
-    opacity: 0;                       // invisível por padrão
-    pointer-events: none;             // não bloqueia clique
-    transition: opacity 0.2s ease;    // animação suave
-    z-index: 1;                        // abaixo do número/X
+    background: rgba(255, 0, 0, 0.4); /* vermelho translúcido */
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1;
   }
 
   &.picked::after {
-    opacity: 1; // ativa o overlay
+    opacity: 1;
   }
+  &.picked .num { opacity: 0.35; }
+  &.picked .x { opacity: 1; }
 
-  &.picked .num { opacity: 0.35; } // número mais apagado
-  &.picked .x   { opacity: 1; }    // X aparece
+  /* NOVO: destaque verde imediato ao selecionar */
+  &.selected {
+    background: #c8f7c5 !important; /* verde claro */
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(37, 211, 102, 0.7);
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  }
 }
+
 
 
 .pagination-wrapper {
