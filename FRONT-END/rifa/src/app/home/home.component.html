@@ -4,7 +4,7 @@
       <span class="pre">rifa do</span>
       <span class="logo">Técnico</span>
     </div>
-    <div class="badge">Prêmio Xbox One S + Controle</div>
+    <div class="badge">Prêmio Xbox One S + Controle <br/> Por Apenas R$ 5,00</div>
 
     <!-- Botões do topo -->
     <button class="top-btn left" (click)="goToPlanilha()" aria-label="Planilha">
@@ -46,6 +46,12 @@
       <button class="page-btn right" (click)="nextPage()" [disabled]="(currentPage+1)*pageSize >= numbers.length">▶</button>
 
       <div class="whatsapp-wrap" *ngIf="selectedNumbers.length > 0">
+        <!-- Total em reais -->
+        <div class="total-wrap">
+          Total: R$ {{ selectedNumbers.length * 5 }}
+        </div>
+      
+        <!-- Botão WhatsApp -->
         <button class="whatsapp-btn" (click)="comprarWhatsapp()">
           Comprar pelo WhatsApp
         </button>
