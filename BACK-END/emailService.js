@@ -1,25 +1,34 @@
 const nodemailer = require("nodemailer");
 const ExcelJS = require("exceljs");
-const fs = require("fs");
-const path = require("path");
+const { MongoClient, ServerApiVersion } = require("mongodb");
+require("dotenv").config();
 
-const filePath = path.join(__dirname, "vendidos.json");
+// Configura MongoDB Atlas
+const uri = `mongodb+srv://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@numerosrifa.x4oaojf.mongodb.net/?retryWrites=true&w=majority&appName=NumerosRifa`;
+const client = new MongoClient(uri, {
+  serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
+});
 
-function loadData() {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify({ usuarios: [] }, null, 2));
+async function loadData() {
+  try {
+    await client.connect();
+    const db = client.db("NumerosRifa"); // nome do DB que você criou
+    const usuariosCollection = db.collection("usuarios"); // nome da coleção
+    const usuarios = await usuariosCollection.find({}).toArray();
+    return { usuarios };
+  } finally {
+    await client.close();
   }
-  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
 }
 
 async function gerarPlanilha() {
-  const data = loadData();
+  const data = await loadData();
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Vendidos");
 
   sheet.addRow(["Usuário", "Números"]);
   data.usuarios.forEach(u => {
-    sheet.addRow([u.nome, u.numeros.join(", ")]);
+    sheet.addRow([u.nome, (u.numeros || []).join(", ")]);
   });
 
   return await workbook.xlsx.writeBuffer();
@@ -33,11 +42,10 @@ async function enviarEmailPlanilha(destinatario) {
     port: 465,
     secure: true, // SSL
     auth: {
-      user: process.env.EMAIL_USER,   // seu Gmail
-      pass: process.env.EMAIL_PASS    // App Password gerada
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
     }
   });
-  
 
   await transporter.sendMail({
     from: `"Relatório Vendidos" <${process.env.EMAIL_USER}>`,
