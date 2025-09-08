@@ -18,6 +18,7 @@ export class HomeComponent implements OnInit {
   currentPage = 0;
   pageSize = 50; // só para celulares/small
   paginatedNumbers: number[] = [];
+  selectedNumbers: number[] = []; // <--- novo
   touchStartX = 0;
 touchEndX = 0;
 
@@ -122,6 +123,23 @@ touchEndX = 0;
     this.router.navigate(['/admin/login'], { queryParams: { redirect: '/admin/planilha' } });
   }
   isSelected(n: number) {
-    return this.marcados.has(n);
+    return this.marcados.has(n) || this.selectedNumbers.includes(n);
+  }
+  toggleNumber(n: number) {
+    if (this.marcados.has(n)) return; // impede selecionar os já marcados
+
+    const idx = this.selectedNumbers.indexOf(n);
+    if (idx >= 0) {
+      this.selectedNumbers.splice(idx, 1); // desseleciona
+    } else {
+      this.selectedNumbers.push(n); // seleciona
+    }
+  }
+
+  comprarWhatsapp() {
+    const numeros = this.selectedNumbers.join(',');
+    const msg = `Olá! Gostaria de adquirir o(s) número(s) ${numeros} da rifa!`;
+    const url = `https://wa.me/5511990095762?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
   }
 }
