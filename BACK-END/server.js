@@ -105,7 +105,6 @@ app.post("/marcados", checkAuthBearer, async (req, res) => {
   if (!data.usuarios.some(u => u.nome === "admin")) data.usuarios.push(adminUser);
   await saveData(data);
 
-  console.log(`[ACESSO] ${new Date().toISOString()} - GET /marcados - IP: ${req.ip}`);
   res.json({ ok: true, total: adminUser.numeros.length, adicionados });
 });
 
@@ -123,10 +122,12 @@ async function saveDataAndNotify(data) {
 
 // --- Endpoints administrativos ---
 app.post("/admin/marcados", async (req, res) => {
-  if (!(req.session && req.session.isAdmin)) return res.status(401).json({ error: "Não autenticado" });
+  if (!(req.session && req.session.isAdmin)) 
+    return res.status(401).json({ error: "Não autenticado" });
 
   const { usuario, numeros } = req.body;
-  if (!usuario || !Array.isArray(numeros)) return res.status(400).json({ error: "usuario e numeros são obrigatórios" });
+  if (!usuario || !Array.isArray(numeros)) 
+    return res.status(400).json({ error: "usuario e numeros são obrigatórios" });
 
   const data = await loadData();
   let user = data.usuarios.find(u => u.nome === usuario);
@@ -136,16 +137,29 @@ app.post("/admin/marcados", async (req, res) => {
   }
 
   let adicionados = 0;
+  let numerosBloqueados = [];
+
   numeros.forEach(n => {
-    if (!user.numeros.includes(n)) {
+    // Verifica se outro usuário já possui esse número
+    const numeroJaVinculado = data.usuarios.some(u => u.nome !== usuario && u.numeros.includes(n));
+    if (numeroJaVinculado) {
+      numerosBloqueados.push(n);
+    } else if (!user.numeros.includes(n)) {
       user.numeros.push(n);
       adicionados++;
     }
   });
 
   await saveDataAndNotify(data);
-  res.json({ ok: true, total: user.numeros.length, adicionados });
+
+  res.json({
+    ok: true,
+    total: user.numeros.length,
+    adicionados,
+    bloqueados: numerosBloqueados  // números que não puderam ser adicionados
+  });
 });
+
 
 app.get("/admin/usuarios", async (req, res) => {
   const data = await loadData();
