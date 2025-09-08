@@ -1,23 +1,20 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
 const session = require("express-session");
-const { Console } = require("console");
+const { MongoClient, ServerApiVersion } = require('mongodb');
 const { enviarEmailPlanilha } = require("./emailService");
-
 
 const PORT = process.env.PORT || 8080;
 const app = express();
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN;
+
 app.set("trust proxy", 1);
 app.use(cors({
   origin: FRONTEND_ORIGIN,
   credentials: true
 }));
 app.use(express.json());
-
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -30,30 +27,54 @@ app.use(session({
   }
 }));
 
-const filePath = path.join(__dirname, "vendidos.json");
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-// Lê JSON do banco, cria estrutura se não existir
-function loadData() {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify({ usuarios: [] }, null, 2));
+// --- Configura MongoDB Atlas ---
+const uri = `mongodb+srv://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@numerosrifa.x4oaojf.mongodb.net/?retryWrites=true&w=majority&appName=NumerosRifa`;
+
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
   }
-  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+});
+
+let usuariosCollection; // <-- coleção global
+
+async function initMongo() {
+  await client.connect();
+  const db = client.db("numerosrifa"); // nome do seu DB
+  usuariosCollection = db.collection("usuarios");
+  console.log("MongoDB conectado com sucesso!");
 }
 
-// Salva JSON no disco
-function saveData(data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+
+// --- Funções de CRUD substituindo JSON ---
+async function loadData() {
+  const usuarios = await usuariosCollection.find({}).toArray();
+  return { usuarios };
 }
 
-// --- Endpoint público /marcados (mantido, sem alteração) ---
-app.get("/marcados", (req, res) => {
-  const data = loadData();
+async function saveData(data) {
+  // Atualiza cada usuário ou insere se não existir
+  for (const u of data.usuarios) {
+    await usuariosCollection.updateOne(
+      { nome: u.nome },
+      { $set: { numeros: u.numeros } },
+      { upsert: true }
+    );
+  }
+}
+
+// --- Endpoint público /marcados ---
+app.get("/marcados", async (req, res) => {
+  const data = await loadData();
   const allNumbers = data.usuarios.flatMap(u => u.numeros);
   res.json(allNumbers);
 });
 
-// --- Endpoint admin via Bearer token (mantido) ---
+// --- Endpoint admin via Bearer token ---
 function checkAuthBearer(req, res, next) {
   const auth = req.headers["authorization"];
   if (!auth) return res.status(401).json({ error: "Auth header requerido" });
@@ -66,11 +87,11 @@ function checkAuthBearer(req, res, next) {
   next();
 }
 
-app.post("/marcados", checkAuthBearer, (req, res) => {
+app.post("/marcados", checkAuthBearer, async (req, res) => {
   const { numeros } = req.body;
   if (!Array.isArray(numeros)) return res.status(400).json({ error: "O campo 'numeros' precisa ser um array" });
 
-  const data = loadData();
+  const data = await loadData();
   const adminUser = data.usuarios.find(u => u.nome === "admin") || { nome: "admin", numeros: [] };
 
   let adicionados = 0;
@@ -82,17 +103,16 @@ app.post("/marcados", checkAuthBearer, (req, res) => {
   });
 
   if (!data.usuarios.some(u => u.nome === "admin")) data.usuarios.push(adminUser);
-  saveData(data);
+  await saveData(data);
+
   console.log(`[ACESSO] ${new Date().toISOString()} - GET /marcados - IP: ${req.ip}`);
   res.json({ ok: true, total: adminUser.numeros.length, adicionados });
 });
+
 // Função para salvar dados e enviar planilha automaticamente
 async function saveDataAndNotify(data) {
-  // Salva no JSON
-  console.log("teste")
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  const email = process.env.EMAIL_USER
-  // Tenta enviar o e-mail
+  await saveData(data);
+  const email = process.env.EMAIL_USER;
   try {
     await enviarEmailPlanilha(email);
     console.log(`[EMAIL] Planilha enviada para ${email}`);
@@ -101,21 +121,45 @@ async function saveDataAndNotify(data) {
   }
 }
 
-// --- Endpoint para enviar planilha ---
-app.post("/admin/enviar-planilha", async (req, res) => {
+// --- Endpoints administrativos ---
+app.post("/admin/marcados", async (req, res) => {
   if (!(req.session && req.session.isAdmin)) return res.status(401).json({ error: "Não autenticado" });
 
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: "Email obrigatório" });
+  const { usuario, numeros } = req.body;
+  if (!usuario || !Array.isArray(numeros)) return res.status(400).json({ error: "usuario e numeros são obrigatórios" });
 
-  try {
-    await enviarEmailPlanilha(email);
-    res.json({ ok: true, mensagem: "Planilha enviada com sucesso" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Falha ao enviar e-mail" });
+  const data = await loadData();
+  let user = data.usuarios.find(u => u.nome === usuario);
+  if (!user) {
+    user = { nome: usuario, numeros: [] };
+    data.usuarios.push(user);
   }
+
+  let adicionados = 0;
+  numeros.forEach(n => {
+    if (!user.numeros.includes(n)) {
+      user.numeros.push(n);
+      adicionados++;
+    }
+  });
+
+  await saveDataAndNotify(data);
+  res.json({ ok: true, total: user.numeros.length, adicionados });
 });
+
+app.get("/admin/usuarios", async (req, res) => {
+  const data = await loadData();
+  res.json(data.usuarios.map(u => u.nome));
+});
+
+app.get("/admin/usuarios-completos", async (req, res) => {
+  if (!(req.session && req.session.isAdmin)) {
+    return res.status(401).json({ error: "Não autenticado" });
+  }
+  const data = await loadData();
+  res.json(data.usuarios);
+});
+
 // --- Login/admin session ---
 app.post("/login", (req, res) => {
   const { user, password } = req.body;
@@ -138,51 +182,15 @@ app.get("/admin/logout", (req, res) => {
     res.json({ ok: true });
   });
 });
+
 app.get("/healthz", (req, res) => {
   res.status(200).send("OK");
 });
 
-// --- Rota administrativa POST /admin/marcados para qualquer usuário ---
-app.post("/admin/marcados", (req, res) => {
-  if (!(req.session && req.session.isAdmin)) return res.status(401).json({ error: "Não autenticado" });
-
-  const { usuario, numeros } = req.body;
-  if (!usuario || !Array.isArray(numeros)) return res.status(400).json({ error: "usuario e numeros são obrigatórios" });
-
-  const data = loadData();
-  let user = data.usuarios.find(u => u.nome === usuario);
-  if (!user) {
-    user = { nome: usuario, numeros: [] };
-    data.usuarios.push(user);
-  }
-
-  let adicionados = 0;
-  numeros.forEach(n => {
-    if (!user.numeros.includes(n)) {
-      user.numeros.push(n);
-      adicionados++;
-    }
+initMongo().then(() => {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Backend rodando na porta ${PORT}`);
   });
-
-  saveDataAndNotify(data);
-  res.json({ ok: true, total: user.numeros.length, adicionados });
-});
-
-// GET lista de usuários (combo box frontend)
-app.get("/admin/usuarios", (req, res) => {
-  const data = loadData();
-  res.json(data.usuarios.map(u => u.nome));
-});
-// GET lista completa de usuários com seus números
-app.get("/admin/usuarios-completos", (req, res) => {
-  if (!(req.session && req.session.isAdmin)) {
-    return res.status(401).json({ error: "Não autenticado" });
-  }
-  const data = loadData();
-  res.json(data.usuarios);
-});
-
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Backend rodando na porta ${PORT}`);
+}).catch(err => {
+  console.error("Erro ao conectar no MongoDB:", err);
 });
