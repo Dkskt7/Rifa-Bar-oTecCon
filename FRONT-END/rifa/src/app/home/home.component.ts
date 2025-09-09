@@ -127,14 +127,14 @@ touchEndX = 0;
   }
   toggleNumber(n: number) {
     if (this.marcados.has(n)) return; // impede selecionar os já marcados
-
-    const idx = this.selectedNumbers.indexOf(n);
-    if (idx >= 0) {
-      this.selectedNumbers.splice(idx, 1); // desseleciona
+  
+    if (this.selectedNumbers.includes(n)) {
+      this.selectedNumbers = this.selectedNumbers.filter(num => num !== n); // nova referência
     } else {
-      this.selectedNumbers.push(n); // seleciona
+      this.selectedNumbers = [...this.selectedNumbers, n]; // nova referência
     }
   }
+  
 
   comprarWhatsapp() {
     const numeros = this.selectedNumbers.join(',');
