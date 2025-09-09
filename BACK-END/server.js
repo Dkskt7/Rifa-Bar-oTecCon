@@ -119,7 +119,21 @@ async function saveDataAndNotify(data) {
     console.error(`[EMAIL] Falha ao enviar planilha:`, err);
   }
 }
+// --- Endpoint para enviar planilha ---
+app.post("/admin/enviar-planilha", async (req, res) => {
+  if (!(req.session && req.session.isAdmin)) return res.status(401).json({ error: "Não autenticado" });
 
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email obrigatório" });
+
+  try {
+    await enviarEmailPlanilha(email);
+    res.json({ ok: true, mensagem: "Planilha enviada com sucesso" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Falha ao enviar e-mail" });
+  }
+});
 // --- Endpoints administrativos ---
 app.post("/admin/marcados", async (req, res) => {
   if (!(req.session && req.session.isAdmin)) 
