@@ -47,9 +47,11 @@
 
       <div class="whatsapp-wrap" *ngIf="selectedNumbers.length > 0">
         <!-- Total em reais -->
-        <div class="total-wrap" translate="no">
-          Total: R$ {{ selectedNumbers.length * 5 }}
+        <div class="total-wrap notranslate">
+          <span>Total: R$ </span>
+          <span>{{ selectedNumbers.length * 5 }}</span>
         </div>
+        
       
         <!-- Botão WhatsApp -->
         <button class="whatsapp-btn" (click)="comprarWhatsapp()">
